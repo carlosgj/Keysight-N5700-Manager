@@ -58,7 +58,7 @@ class N6700SCPI():
         #return int(self.getNumber("SYST:CHAN:COUN?")) This returns the number of physical channels, without considering groups
         grpstr = self.query("SYST:GRO:CAT?")
         assert grpstr is not None and len(grpstr) > 2
-        REGEX = '''\"([\d,]+)\"'''
+        REGEX = '''\"([\d,]+)\"''' #Yeah, I know, fuck regexes
         groups = re.findall(REGEX, grpstr)
         print groups
         for g in groups:
@@ -109,6 +109,7 @@ class N6700SCPI():
         grpstr = ','.join([str(x) for x in self.channels])
         rawstr = self.query("STAT:QUES:COND? (@%s)"%grpstr)
         result = []
+        #Break down 16-bit ints into bits per N6700 Programmer's Reference Guide
         for num in [int(x) for x in rawstr.split(',')]:
             bits = '{:016b}'.format(num)
             vals = [x=='1' for x in bits]
@@ -117,6 +118,7 @@ class N6700SCPI():
             for i, d in enumerate(defs):
                 retdict[d] = vals[-1-i]
             result.append(retdict)
+        #Returns a list of dicts
         return result
 
     def close(self):
